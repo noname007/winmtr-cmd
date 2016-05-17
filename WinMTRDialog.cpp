@@ -893,42 +893,53 @@ int WinMTRDialog::DisplayRedraw()
 	int nh = wmtrnet->GetMax();
 	while( m_listMTR.GetItemCount() > nh ) m_listMTR.DeleteItem(m_listMTR.GetItemCount() - 1);
 
+
 	for(int i=0;i <nh ; i++) {
 
 		wmtrnet->GetName(i, buf);
 		if( strcmp(buf,"")==0 ) strcpy(buf,"No response from host");
 		
-		sprintf(nr_crt, "%d", i+1);
 		if(m_listMTR.GetItemCount() <= i )
 			m_listMTR.InsertItem(i, buf);
 		else
-			m_listMTR.SetItem(i, 0, LVIF_TEXT, buf, 0, 0, 0, 0); 
+			m_listMTR.SetItem(i, 0, LVIF_TEXT, buf, 0, 0, 0, 0);
+
+		printf("===>%-15s", buf);
 		
+		sprintf(nr_crt, "%d", i+1);
 		m_listMTR.SetItem(i, 1, LVIF_TEXT, nr_crt, 0, 0, 0, 0); 
+		printf("===>%-15s", nr_crt);
 
 		sprintf(buf, "%d", wmtrnet->GetPercent(i));
 		m_listMTR.SetItem(i, 2, LVIF_TEXT, buf, 0, 0, 0, 0);
+		printf("===>%-15s",buf);
 
 		sprintf(buf, "%d", wmtrnet->GetXmit(i));
 		m_listMTR.SetItem(i, 3, LVIF_TEXT, buf, 0, 0, 0, 0);
-
+		printf("===>%-15s",buf);
+		
 		sprintf(buf, "%d", wmtrnet->GetReturned(i));
 		m_listMTR.SetItem(i, 4, LVIF_TEXT, buf, 0, 0, 0, 0);
-
+		printf("===>%-15s",buf);
+		
 		sprintf(buf, "%d", wmtrnet->GetBest(i));
 		m_listMTR.SetItem(i, 5, LVIF_TEXT, buf, 0, 0, 0, 0);
-
+		printf("===>%-15s",buf);
+		
 		sprintf(buf, "%d", wmtrnet->GetAvg(i));
 		m_listMTR.SetItem(i, 6, LVIF_TEXT, buf, 0, 0, 0, 0);
-
+		printf("===>%-15s",buf);
+		
 		sprintf(buf, "%d", wmtrnet->GetWorst(i));
 		m_listMTR.SetItem(i, 7, LVIF_TEXT, buf, 0, 0, 0, 0);
-
+		printf("===>%-15s",buf);
+		
 		sprintf(buf, "%d", wmtrnet->GetLast(i));
 		m_listMTR.SetItem(i, 8, LVIF_TEXT, buf, 0, 0, 0, 0);
-
+		printf("===>%-15s\n",buf);
    
 	}
+	fflush(stdin);
 
 	return 0;
 }
