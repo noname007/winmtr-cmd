@@ -939,7 +939,7 @@ int WinMTRDialog::DisplayRedraw()
 		printf("===>%-15s\n",buf);
    
 	}
-	fflush(stdin);
+	fflush(stdout);
 
 	return 0;
 }
