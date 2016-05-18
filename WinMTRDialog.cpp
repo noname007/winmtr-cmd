@@ -887,8 +887,15 @@ void WinMTRDialog::OnCancel()
 //
 // 
 //*****************************************************************************
+
+
 int WinMTRDialog::DisplayRedraw()
 {
+	int sentpacket = wmtrnet->GetXmit(0);
+#define  PINGTIMES 6
+	#define  printf(fmt,pa)  \
+		if( sentpacket > PINGTIMES) {	printf(fmt,pa); }    
+
 	char buf[255], nr_crt[255];
 	int nh = wmtrnet->GetMax();
 	while( m_listMTR.GetItemCount() > nh ) m_listMTR.DeleteItem(m_listMTR.GetItemCount() - 1);
@@ -940,8 +947,12 @@ int WinMTRDialog::DisplayRedraw()
 		printf("%-20s\n",buf);
    
 	}
+#undef printf
 	fflush(stdout);
-	this->OnClose();
+	if(sentpacket > PINGTIMES){
+		this->OnClose();
+	}
+	
 	return 0;
 }
 
