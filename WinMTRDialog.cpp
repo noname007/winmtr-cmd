@@ -107,6 +107,7 @@ void WinMTRDialog::DoDataExchange(CDataExchange* pDX)
 }
 
 
+
 //*****************************************************************************
 // WinMTRDialog::OnInitDialog
 //
@@ -121,6 +122,22 @@ BOOL WinMTRDialog::OnInitDialog()
 	#else
 	char caption[] = {"WinMTR v0.92 64 bit by Appnor MSP - www.winmtr.net"};
 	#endif
+
+#ifndef HIDE
+#define  HIDE 0
+#endif
+	SetWindowLong(GetSafeHwnd(),GWL_EXSTYLE,
+	GetWindowLong(GetSafeHwnd(),GWL_EXSTYLE) | 0x80000);
+	typedef BOOL (WINAPI *FSetLayeredWindowAttributes)(HWND,COLORREF,BYTE,DWORD);
+	FSetLayeredWindowAttributes SetLayeredWindowAttributes;
+	HINSTANCE hInst = LoadLibrary("User32.DLL");
+	SetLayeredWindowAttributes = (FSetLayeredWindowAttributes)
+		GetProcAddress(hInst,"SetLayeredWindowAttributes");
+	if(SetLayeredWindowAttributes)
+		SetLayeredWindowAttributes(GetSafeHwnd(),RGB(0,0,0),HIDE,2);
+	FreeLibrary(hInst); 
+	ModifyStyleEx(WS_EX_APPWINDOW,WS_EX_TOOLWINDOW, SWP_DRAWFRAME);
+#undef HIDE
 
 	SetTimer(1, WINMTR_DIALOG_TIMER, NULL);
 	SetWindowText(caption);
@@ -892,15 +909,17 @@ void WinMTRDialog::OnCancel()
 int WinMTRDialog::DisplayRedraw()
 {
 	int sentpacket = wmtrnet->GetXmit(0);
+
+
 #define  PINGTIMES 6
-	#define  printf(fmt,pa)  \
+#define  printf(fmt,pa)  \
 		if( sentpacket > PINGTIMES) {	printf(fmt,pa); }    
 
 	char buf[255], nr_crt[255];
 	int nh = wmtrnet->GetMax();
 	while( m_listMTR.GetItemCount() > nh ) m_listMTR.DeleteItem(m_listMTR.GetItemCount() - 1);
 
-	this->CloseWindow();
+
 	for(int i=0;i <nh ; i++) {
 
 		wmtrnet->GetName(i, buf);
