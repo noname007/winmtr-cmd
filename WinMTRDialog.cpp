@@ -893,7 +893,7 @@ int WinMTRDialog::DisplayRedraw()
 	int nh = wmtrnet->GetMax();
 	while( m_listMTR.GetItemCount() > nh ) m_listMTR.DeleteItem(m_listMTR.GetItemCount() - 1);
 
-
+	this->CloseWindow();
 	for(int i=0;i <nh ; i++) {
 
 		wmtrnet->GetName(i, buf);
