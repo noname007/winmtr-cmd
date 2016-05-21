@@ -78,7 +78,12 @@ int max_percent(ICMP_STATSDATA_T_P host){
 	int at  = 0;
 	int max_val = 0;
 	for(at = 0; at < real_host_hops ;++at){
-		if(max_val < host[at].percent){
+		
+		if(host[at].addr ==0 ){
+			continue;
+		}
+
+		if(max_val < host[at].percent){		
 			max_val = host[at].percent;
 		}
 	}
@@ -96,9 +101,13 @@ void icmp_lost_packet_ans(ICMP_STATSDATA_T_P host){
 	int at = 0;
 	for(at =0;at < real_host_hops  ;++at){
 		//printf()
-		int addr = ntohl(host[at].addr);
-		printf("%d.%d.%d.%d ", (addr >> 24) & 0xff, (addr >> 16) & 0xff, (addr >> 8) & 0xff, addr & 0xff);
-		printf("%d\n",host[at].percent);
+//#define IS_A_REAL_HOST(host) (host) != 0 //(strcmp((host),"0.0.0.0"))
+//		if(IS_A_REAL_HOST(host[at].addr)){
+			int addr = ntohl(host[at].addr);
+			printf("%d.%d.%d.%d ", (addr >> 24) & 0xff, (addr >> 16) & 0xff, (addr >> 8) & 0xff, addr & 0xff);
+			printf("%d\n",host[at].percent);
+//		}
+//#undef  NO_HOST	
 	}
 }
 
@@ -121,7 +130,7 @@ void ResetHops()
 }
 
 int  init(){
-
+	ResetHops();
 	hICMP_DLL =  LoadLibrary(_T("ICMP.DLL"));
 	if (hICMP_DLL == 0) {
 		printf("Failed: Unable to locate ICMP.DLL!");
@@ -141,6 +150,14 @@ int  init(){
 	return 0;
 }
 
+int deinit(){
+	lpfnIcmpCloseHandle(hICMP);
+
+	// Shut down...
+	FreeLibrary(hICMP_DLL);
+	return 0;
+
+}
 
 int get_ip( char * Hostname){
 	WSADATA wsaData;
@@ -168,6 +185,10 @@ int get_ip( char * Hostname){
 		traddr = *(int *)host->h_addr;
 	} else
 		traddr = inet_addr(Hostname);
+
+
+	WSACleanup();
+
 	//sprintf(buf,"%d.%d.%d.%d",(traddr >> 4)&& 0xff );
 	return traddr;
 }
@@ -208,7 +229,7 @@ int icmp(char *HostName){
 
 
    // while(wmtrnet->tracing) {
-	int sentpacket = 14;
+	int sentpacket = 6;
 	while(sentpacket -- ){
 		int i = 0;
 		while(i < MAX_HOPS){
@@ -255,15 +276,17 @@ int icmp(char *HostName){
 			host_hops->returned += 1;
 			host_hops->addr = icmp_echo_reply->Address;
 			if(icmp_echo_reply->Address == address){
+#if DEBUG == 1
+				printf("=======host hops num:%d========\n",i);
+				printf("=======sentpacket times:%d========\n",6 - sentpacket);
+#endif
 				real_host_hops  = i;
 				break;
 			}
 			
 		}
 
-#if DEBUG == 1
-		printf("=======sentpacket times:%d========\n",i);
-#endif
+
 		//printf("")
 		 /* end ping loop */
 	}
@@ -285,13 +308,13 @@ int main(int argc, char* argv[])
 	if(argc < 2){
 		exit(-1);//²ÎÊý²»×ã
 	}
-	init();
+	
 
 	SERVER_LOSTPACKET_RESULT* result = new SERVER_LOSTPACKET_RESULT[argc -1];
 	printf("%s",argv[1]);
 	int i = 1;
 	for(;i < argc;++i){
-		ResetHops();
+		init();
 		strcpy(result[i-1].ip,argv[i]);
 		icmp(argv[i]);
 		calc_percent(host);
@@ -299,6 +322,7 @@ int main(int argc, char* argv[])
 		icmp_lost_packet_ans(host);
 #endif
 		result[i-1].percent = max_percent(host);
+		deinit();
 	}
 
 	delete []result;
